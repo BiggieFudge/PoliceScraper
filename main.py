@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import Select
 import time
 import re
 import os
+import pandas as pd
 
 # as per recommendation from @freylis, compile once only
 CLEANR = re.compile('<.*?>')
@@ -30,7 +31,7 @@ YearList.reverse()
 
 mainDict = {}
 
-for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attribute('innerHTML').split('</li>'):
+for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attribute('innerHTML').split('</li>')[0:3]:
     flag = False
     print(cleanhtml(roadNumber))
     driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Road_Input"]').clear()
@@ -66,36 +67,26 @@ for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attrib
             try:
                 if flag:
                     # flag is for downloading whole year data fix this
-                    collisionData = driver.find_element(By.CLASS_NAME, value='resultset').get_attribute('innerHTML')
-                    # os.makedirs(
-                    #     f'./{cleanhtml(roadNumber)}/{year}',
-                    #     exist_ok=True)
-                    # with open(
-                    #         f'./{cleanhtml(roadNumber)}/{year}/{cleanhtml(roadNumber)}.text',
-                    #         'w', encoding='utf-8') as f:
-                    #     for tr in collisionData.split('</div>'):
-                    #         f.write(cleanhtml(tr) + '\n')
-                    # print((
-                    #           f'./{cleanhtml(roadNumber)}/{year}/{cleanhtml(roadNumber)}.text saved succefully'))
-                    mainDict.update({cleanhtml(roadNumber) + ":" + cleanhtml(junctionName) + ":" +cleanhtml(junctionsList[idx+1]) : collisionData})
+                    collisionData=driver.find_element(By.CLASS_NAME, value='resultset').get_attribute('innerHTML').split('</div>')
+                    secondaryDict = {}
+                    for index in range( 2 ,len(collisionData[2:]) - 2  ,2):
+                        secondaryDict.update({cleanhtml(collisionData[index]) : cleanhtml(collisionData[index + 1])})
+                    mainDict.update({cleanhtml(roadNumber) + ":" + cleanhtml(junctionName) + ":" +cleanhtml(junctionsList[idx+1]) : secondaryDict})
 
                 else:
-                    collisionData=driver.find_element(By.CLASS_NAME, value='resultset').get_attribute('innerHTML').split('/n')
-                    # os.makedirs(f'./{cleanhtml(roadNumber)}/{cleanhtml(junctionName)+":"+cleanhtml(junctionsList[idx + 1])}/{year}', exist_ok=True)
-                    # with open(f'./{cleanhtml(roadNumber)}/{cleanhtml(junctionName)+":"+cleanhtml(junctionsList[idx + 1])}/{year}/{cleanhtml(junctionName)+"-"+cleanhtml(junctionsList[idx + 1])}.text', 'w', encoding='utf-8') as f:
-                    #     for tr in collisionData.split('</div>'):
-                    #         f.write(cleanhtml(tr)+'\n')
-                    #
-                    # print((f'./{cleanhtml(roadNumber)}/{cleanhtml(junctionName)+"-"+cleanhtml(junctionsList[idx + 1])}/{year}/{cleanhtml(junctionName)+"-"+cleanhtml(junctionsList[idx + 1])}.text saved succefully' ))
-                    #     #f.write(cleanhtml(collisionData))
+                    collisionData=driver.find_element(By.CLASS_NAME, value='resultset').get_attribute('innerHTML').split('</div>')
                     secondaryDict = {}
-                    for item in collisionData:
-                        secondaryDict.update({''.join(i for i in cleanhtml(item) if not i.isdigit()): int(re.search(r'\d+', cleanhtml(item)).group())})
+                    for index in range( 2 ,len(collisionData[2:]) - 2  ,2):
+                        secondaryDict.update({cleanhtml(collisionData[index]) : cleanhtml(collisionData[index + 1])})
                     mainDict.update({cleanhtml(roadNumber) + ":" + cleanhtml(junctionName) + ":" +cleanhtml(junctionsList[idx+1]) : secondaryDict})
 
             except Exception as e:
                 print(e)
                 pass
+dataBase = pd.DataFrame.from_dict(mainDict, orient='index')
+dataBase.to_csv('dataBase.csv' , encoding='utf-8-sig')
+
+
 
 
 
