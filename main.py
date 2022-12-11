@@ -33,7 +33,7 @@ mainDict = {}
 driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_YearComboBox_Input"]').send_keys(2)
 driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_YearComboBox_Input"]').send_keys(Keys.ENTER)
 
-for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attribute('innerHTML').split('</li>')[0:100]:
+for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attribute('innerHTML').split('</li>'):
     flag = False
     print(cleanhtml(roadNumber))
     driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Road_Input"]').clear()
@@ -42,44 +42,46 @@ for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attrib
     driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Road_Input"]').send_keys(Keys.ENTER)
     time.sleep(2.5)
     junctionsList = list(driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_DropDown"]').get_attribute('innerHTML').split('</li>'))
-    for idx,junctionName in enumerate(driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_DropDown"]').get_attribute('innerHTML').split('</li>')):
-        if idx + 1 == len(junctionsList) - 1:
-            break
-        if len(junctionsList) < 2:
-            flag =True
+    # for idx,junctionName in enumerate(driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_DropDown"]').get_attribute('innerHTML').split('</li>')):
+    #     if idx + 1 == len(junctionsList) - 1:
+    #         break
+    #     if len(junctionsList) < 2:
+    #         flag =True
+    #     else:
+            # print(cleanhtml(junctionName), cleanhtml(junctionsList[idx+1]))
+            # driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_Input"]').clear()
+            # driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_Input"]').send_keys(cleanhtml(junctionName))
+            # time.sleep(1)
+            # driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_Input"]').send_keys(Keys.ENTER)
+            # driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction2_Input"]').clear()
+            # driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction2_Input"]').send_keys(cleanhtml(junctionsList[idx+1]))
+            # time.sleep(1)
+            # driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction2_Input"]').send_keys(Keys.ENTER)
+
+    driver.find_element(By.XPATH, value='//*[@id="SearchButton"]').click()
+    time.sleep(1)
+    try:
+        if flag:
+            # flag is for downloading whole year data fix this
+            collisionData=driver.find_element(By.CLASS_NAME, value='resultset').get_attribute('innerHTML').split('</div>')
+            secondaryDict = {}
+            for index in range( 2 ,len(collisionData[2:]) - 2  ,2):
+                secondaryDict.update({cleanhtml(collisionData[index]) : cleanhtml(collisionData[index + 1])})
+            mainDict.update({cleanhtml(roadNumber) + ":": secondaryDict})
+
+
         else:
-            print(cleanhtml(junctionName), cleanhtml(junctionsList[idx+1]))
-            driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_Input"]').clear()
-            driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_Input"]').send_keys(cleanhtml(junctionName))
-            time.sleep(1)
-            driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_Input"]').send_keys(Keys.ENTER)
-            driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction2_Input"]').clear()
-            driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction2_Input"]').send_keys(cleanhtml(junctionsList[idx+1]))
-            time.sleep(1)
-            driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction2_Input"]').send_keys(Keys.ENTER)
+            collisionData=driver.find_element(By.CLASS_NAME, value='resultset').get_attribute('innerHTML').split('</div>')
+            secondaryDict = {}
+            for index in range( 2 ,len(collisionData[2:]) - 2  ,2):
+                secondaryDict.update({cleanhtml(collisionData[index]) : cleanhtml(collisionData[index + 1])})
+            mainDict.update({cleanhtml(roadNumber) + ":": secondaryDict})
 
-            driver.find_element(By.XPATH, value='//*[@id="SearchButton"]').click()
-            time.sleep(1)
-            try:
-                if flag:
-                    # flag is for downloading whole year data fix this
-                    collisionData=driver.find_element(By.CLASS_NAME, value='resultset').get_attribute('innerHTML').split('</div>')
-                    secondaryDict = {}
-                    for index in range( 2 ,len(collisionData[2:]) - 2  ,2):
-                        secondaryDict.update({cleanhtml(collisionData[index]) : cleanhtml(collisionData[index + 1])})
-                    mainDict.update({cleanhtml(roadNumber) + ":" + cleanhtml(junctionName) + ":" +cleanhtml(junctionsList[idx+1]) : secondaryDict})
-
-                else:
-                    collisionData=driver.find_element(By.CLASS_NAME, value='resultset').get_attribute('innerHTML').split('</div>')
-                    secondaryDict = {}
-                    for index in range( 2 ,len(collisionData[2:]) - 2  ,2):
-                        secondaryDict.update({cleanhtml(collisionData[index]) : cleanhtml(collisionData[index + 1])})
-                    mainDict.update({cleanhtml(roadNumber) + ":" + cleanhtml(junctionName) + ":" +cleanhtml(junctionsList[idx+1]) : secondaryDict})
-
-            except Exception as e:
-                print(e)
-                pass
+    except Exception as e:
+        print(e)
+        pass
 dataBase = pd.DataFrame.from_dict(mainDict, orient='index')
+dataBase.fillna(0, inplace=True)
 dataBase.to_csv('dataBase.csv' , encoding='utf-8-sig')
 
 
