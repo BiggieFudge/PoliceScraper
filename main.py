@@ -30,15 +30,17 @@ YearList = [2022]
 YearList.reverse()
 
 mainDict = {}
+driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_YearComboBox_Input"]').send_keys(2)
+driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_YearComboBox_Input"]').send_keys(Keys.ENTER)
 
-for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attribute('innerHTML').split('</li>')[0:3]:
+for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attribute('innerHTML').split('</li>')[0:100]:
     flag = False
     print(cleanhtml(roadNumber))
     driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Road_Input"]').clear()
     driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Road_Input"]').send_keys(cleanhtml(roadNumber))
     time.sleep(1)
     driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Road_Input"]').send_keys(Keys.ENTER)
-    time.sleep(2)
+    time.sleep(2.5)
     junctionsList = list(driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_DropDown"]').get_attribute('innerHTML').split('</li>'))
     for idx,junctionName in enumerate(driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction1_DropDown"]').get_attribute('innerHTML').split('</li>')):
         if idx + 1 == len(junctionsList) - 1:
@@ -55,13 +57,7 @@ for roadNumber in driver.find_element(By.CLASS_NAME, value='rcbList').get_attrib
             driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction2_Input"]').send_keys(cleanhtml(junctionsList[idx+1]))
             time.sleep(1)
             driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_Junction2_Input"]').send_keys(Keys.ENTER)
-        for year in YearList:
-            print(year)
-            # Starting with one year
-            # driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_YearComboBox_Input"]').send_keys(2)
-            time.sleep(1)
-            driver.find_element(By.XPATH, value='//*[@id="ctl00_ctl00_ContentPlaceMain_contentPageMain_YearComboBox_Input"]').send_keys(Keys.ENTER)
-            time.sleep(1)
+
             driver.find_element(By.XPATH, value='//*[@id="SearchButton"]').click()
             time.sleep(1)
             try:
